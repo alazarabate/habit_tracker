@@ -11,20 +11,36 @@ class HomeScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(title: const Text('Habit Tracker')),
-      body: ListView.builder(
-        itemCount: habits.length,
-        itemBuilder: (context, index) {
-          final habit = habits[index];
-          return ListTile(
-            title: Text(habit.name),
-            subtitle: Text('Streak: ${habit.streak}'),
-            trailing: Checkbox(
-              value: habit.isDone,
-              onChanged: (_) => ref.read(habitProvider.notifier).toggleDone(habit.id),
+      body: habits.isEmpty
+          ? const Center(
+              child: Text(
+                'No habits yet.\nTap + to add one.',
+                textAlign: TextAlign.center,
+              ),
+            )
+          : ListView.builder(
+              itemCount: habits.length,
+              itemBuilder: (context, index) {
+                final habit = habits[index];
+                return ListTile(
+                  title: Text(habit.name),
+                  subtitle: Text(
+                    'Streak: ${habit.streak} days',
+                    style: TextStyle(
+                      color: habit.isDone ? Colors.green : Colors.grey,
+                    ),
+                  ),
+                  trailing: Checkbox(
+                    value: habit.isDone,
+                    onChanged: (bool? value) {
+                      if (value != null) {
+                        ref.read(habitProvider.notifier).toggleDone(habit.id);
+                      }
+                    },
+                  ),
+                );
+              },
             ),
-          );
-        },
-      ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _showAddDialog(context, ref),
         child: const Icon(Icons.add),
@@ -38,7 +54,12 @@ class HomeScreen extends ConsumerWidget {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Add Habit'),
-        content: TextField(controller: controller),
+        content: TextField(
+          controller: controller,
+          decoration: const InputDecoration(
+            hintText: 'e.g., Exercise, Read, Meditate',
+          ),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -46,8 +67,8 @@ class HomeScreen extends ConsumerWidget {
           ),
           TextButton(
             onPressed: () {
-              if (controller.text.isNotEmpty) {
-                ref.read(habitProvider.notifier).addHabit(controller.text);
+              if (controller.text.trim().isNotEmpty) {
+                ref.read(habitProvider.notifier).addHabit(controller.text.trim());
                 Navigator.pop(context);
               }
             },
