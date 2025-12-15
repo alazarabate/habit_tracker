@@ -5,9 +5,10 @@ import '../models/habit.dart';
 
 class HabitNotifier extends StateNotifier<List<Habit>> {
   HabitNotifier() : super([]) {
-    _loadHabits();
+    _loadHabits(); // Load on startup
   }
 
+  // Load from SharedPreferences
   Future<void> _loadHabits() async {
     final prefs = await SharedPreferences.getInstance();
     final habitsString = prefs.getString('habits');
@@ -22,6 +23,7 @@ class HabitNotifier extends StateNotifier<List<Habit>> {
     }
   }
 
+  // Save to SharedPreferences
   Future<void> _saveHabits() async {
     final prefs = await SharedPreferences.getInstance();
     final habitsJson = state.map((habit) => {
@@ -36,7 +38,7 @@ class HabitNotifier extends StateNotifier<List<Habit>> {
   void addHabit(String name) {
     final newHabit = Habit(id: DateTime.now().toString(), name: name);
     state = [...state, newHabit];
-    _saveHabits();
+    _saveHabits(); // Save after adding
   }
 
   void toggleDone(String id) {
@@ -50,7 +52,7 @@ class HabitNotifier extends StateNotifier<List<Habit>> {
         else
           habit,
     ];
-    _saveHabits();
+    _saveHabits(); // Save after toggling
   }
 }
 
